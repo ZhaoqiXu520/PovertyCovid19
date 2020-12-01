@@ -1,0 +1,38 @@
+---
+title: "Final Project"
+output: html_document
+---
+
+```{r}
+library(tidyverse) # for various packages
+library(haven) #for read_csv
+library(survRM2) #For RMST
+library(magrittr) #For %$%
+library(VIM) 
+library(mice) 
+library(lattice)
+poverty <- read_csv("Poverty.csv") 
+
+```
+```{r}
+#provide shorter names for variables
+names(poverty)<-c("zipcode","population","bpoverty","bpoverty%","casecount","casepercent","caserate") 
+md.pattern(poverty, rotate.names=TRUE)
+poverty2<-na.omit(poverty)
+
+```
+
+```{r}
+cor(poverty2)
+res <-  cor(x = poverty2[,"bpoverty%"], y = poverty2[,"caserate"], method = "spearman")
+library(Hmisc)
+res2 <- rcorr(as.matrix(poverty2))
+res2
+
+```
+
+```{r}
+library(corrplot)
+corrplot(res2$r, type="upper", order="hclust", p.mat = res2$P, sig.level = 0.01, insig = "blank")
+
+```
