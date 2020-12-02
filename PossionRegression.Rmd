@@ -1,0 +1,38 @@
+---
+title: "New"
+output: html_document
+---
+```{r}
+library(tidyverse) # for various packages
+library(haven) #for read_csv
+library(survRM2) #For RMST
+library(magrittr) #For %$%
+library(VIM) 
+library(mice) 
+library(lattice)
+poverty <- read_csv("Poverty.csv") 
+
+```
+
+```{r}
+names(poverty)<-c("zipcode","population","bpoverty","bpoverty%","casecount","casepercent","caserate")
+md.pattern(poverty, rotate.names=TRUE)
+poverty <-na.omit(poverty)
+poverty <- poverty %>%
+         ##Recode stage variable as a binary variable
+  mutate(poverty_stage=case_when(zipcode %in% c("63119","63117","63109","63102","63123","63105","63125","63139","63143") ~ 0,
+                                 zipcode %in% 
+c("63110","63130","63101","63103","63104","63116","63112","63137","63136") ~ 1,
+                                 zipcode %in% 
+c("63108","63147","63118","63113","63115","63111","63107","63120","63106") ~ 2),
+poverty_stage = factor(poverty_stage, 0:2, c("low", "medium", "high")))
+
+
+```
+
+```{r}
+fit <- glm(casecount ~ poverty_stage, offset = log(population), family = poisson(), data = poverty)
+summary(fit)
+exp(coef(fit))
+```
+
